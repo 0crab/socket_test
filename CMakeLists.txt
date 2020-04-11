@@ -4,6 +4,9 @@ set(CMAKE_C_COMPILER "gcc")
 set(CMAKE_CXX_COMPILER "g++")
 
 
+
 add_executable(server server.c)
 
-add_executable(client client.c)
+target_link_libraries(server -lpthread)
+
+add_executable(client client.c )

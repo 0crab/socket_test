@@ -69,7 +69,7 @@ int main(void)
 
         struct sockaddr_in srv_addr;
         srv_addr.sin_family = AF_INET;
-        srv_addr.sin_port = htons(SERVER_PORT);
+        srv_addr.sin_port = htons(TARGET_PORT);
         srv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
         //connect server
