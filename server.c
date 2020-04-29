@@ -7,7 +7,8 @@
 #include <pthread.h>
 #include "settings.h"
 
-int server_port[4] = {8883, 8884, 8885, 8886};
+
+
 
 #define READ_FROM_CLIENT 0X01
 #define WRITE_TO_CLIENT 0x02
@@ -60,7 +61,7 @@ void *thread_func(void *threadid) {
         }
         struct sockaddr_un srv_addr;
         srv_addr.sun_family = AF_UNIX;
-        strcpy(srv_addr.sun_path, UNIX_DOMAIN);
+        strcpy(srv_addr.sun_path, unix_domain_list[tid]);
         socklen_t ret;
         ret = bind(listen_fd, (struct sockaddr *) &srv_addr, sizeof(srv_addr));
         if (ret == -1) {

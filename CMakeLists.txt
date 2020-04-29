@@ -10,3 +10,7 @@ add_executable(server server.c)
 target_link_libraries(server -lpthread)
 
 add_executable(client client.c )
+
+add_executable(client_multi client_multi.c)
+
+target_link_libraries(client_multi -lpthread)
