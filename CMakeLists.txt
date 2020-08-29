@@ -1,16 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
+project(socket_test)
 
-set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_CXX_STANDARD 11)
 
+link_libraries(pthread)
 
+add_executable(server server.cpp)
 
-add_executable(server server.c)
+add_executable(client client.cpp config.h)
 
-target_link_libraries(server -lpthread)
-
-add_executable(client client.c )
-
-add_executable(client_multi client_multi.c)
-
-target_link_libraries(client_multi -lpthread)
