@@ -10,8 +10,10 @@
 
 using namespace  std;
 
-#define THREAD_NUM 4
-#define REC_BUF_SIZE 4096
+int thread_num;
+int rec_buf_size;
+#define THREAD_NUM thread_num
+#define REC_BUF_SIZE rec_buf_size
 
 void worker(int tid) {
 
@@ -61,16 +63,15 @@ void worker(int tid) {
 }
 
 
-int main() {
+int main(int argc, char **argv) {
+    if(argc == 3){
+        THREAD_NUM = std::atol(argv[1]);
+        REC_BUF_SIZE = std::atol(argv[2]);
+    }else{
+        printf("client <thread_num>  <rec_buf_size>\n");
+        return 0;
+    }
     vector<thread> threads;
-    for (int i = 0; i < THREAD_NUM; i++) {
-        threads.push_back(thread(worker,i));
-    }
-
-    for (int i = 0; i < THREAD_NUM; i++) {
-        threads[i].join();
-    }
-
-
-
+    for (int i = 0; i < THREAD_NUM; i++) threads.push_back(thread(worker,i));
+    for (int i = 0; i < THREAD_NUM; i++) threads[i].join();
 }
