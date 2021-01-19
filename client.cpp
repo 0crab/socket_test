@@ -23,7 +23,7 @@ uint64_t timer_range;
 #define SEND_BUF_LEN send_buf_len
 #define TIMER_RANGE timer_range
 
-#define ROUND_SET 10000000
+#define ROUND_SET 100000
 
 uint64_t  g_sendcount;
 uint64_t * runtimelist;

@@ -5,6 +5,7 @@
 #include <sys/unistd.h>
 #include <netinet/in.h>
 #include <thread>
+#include <iostream>
 #include <vector>
 #include "config.h"
 
@@ -19,7 +20,6 @@ void worker(int tid) {
 
     char rec_buf[REC_BUF_SIZE];
 
-    printf("AF_INET\n");
     socklen_t listen_fd;
     listen_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd < 0) {
@@ -58,6 +58,7 @@ void worker(int tid) {
             close(listen_fd);
             return;
         }
+        cout<<tid + PORT_BASE<<" rec a connect"<<endl;
         while (read(con_fd, rec_buf, REC_BUF_SIZE) > 0) {}
     }
 }
@@ -71,6 +72,7 @@ int main(int argc, char **argv) {
         printf("client <thread_num>  <rec_buf_size>\n");
         return 0;
     }
+    cout<<"thread_num "<<thread_num<<"rec_buf_size"<<rec_buf_size<<endl;
     vector<thread> threads;
     for (int i = 0; i < THREAD_NUM; i++) threads.push_back(thread(worker,i));
     for (int i = 0; i < THREAD_NUM; i++) threads[i].join();
