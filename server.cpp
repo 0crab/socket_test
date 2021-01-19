@@ -16,20 +16,17 @@ int rec_buf_size;
 #define THREAD_NUM thread_num
 #define REC_BUF_SIZE rec_buf_size
 
-void worker(int tid) {
+void get_listen_fd(int tid,bool rec_port,socklen_t & listen_fd,struct sockaddr_in &srv_addr){
 
-    char rec_buf[REC_BUF_SIZE];
-
-    socklen_t listen_fd;
     listen_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd < 0) {
         perror("cannot create communication socket");
         return;
     }
 
-    struct sockaddr_in srv_addr;
+    int port = rec_port? PORT_BASE + tid : PORT_BASE + THREAD_NUM + tid;
     srv_addr.sin_family = AF_INET;
-    srv_addr.sin_port = htons(PORT_BASE+tid);
+    srv_addr.sin_port = htons(port);
     srv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     socklen_t ret;
@@ -46,20 +43,50 @@ void worker(int tid) {
         close(listen_fd);
         return;
     }
-    socklen_t con_fd;
+}
+
+void worker(int tid) {
+
+    char rec_buf[REC_BUF_SIZE];
+
+    socklen_t  rec_listen_fd;
+    struct sockaddr_in rec_srv_addr;
+    get_listen_fd(tid,true,rec_listen_fd,rec_srv_addr);
+    socklen_t  send_listen_fd;
+    struct sockaddr_in send_srv_addr;
+    get_listen_fd(tid,false,send_listen_fd,send_srv_addr);
+
+    socklen_t con_fd1,con_fd2;
     socklen_t len;
 
     while (1) {
         //have connect request use accept
-        len = sizeof(srv_addr);
-        con_fd = accept(listen_fd, (struct sockaddr *) &srv_addr, &len);
-        if (con_fd < 0) {
+        len = sizeof(rec_srv_addr);
+        con_fd1 = accept(rec_listen_fd, (struct sockaddr *) &rec_srv_addr, &len);
+        if (con_fd1 < 0) {
             perror("cannot accept client connect request");
-            close(listen_fd);
+            close(rec_listen_fd);
             return;
         }
         cout<<tid + PORT_BASE<<" rec a connect"<<endl;
-        while (read(con_fd, rec_buf, REC_BUF_SIZE) > 0) {}
+
+        len = sizeof(send_srv_addr);
+        con_fd2 = accept(send_listen_fd, (struct sockaddr *) &send_srv_addr, &len);
+        if (con_fd2 < 0) {
+            perror("cannot accept client connect request");
+            close(send_listen_fd);
+            return;
+        }
+        cout<<tid + PORT_BASE + THREAD_NUM<<" rec a connect"<<endl;
+
+
+
+        uint64_t count;
+        while (read(con_fd1, rec_buf, REC_BUF_SIZE) > 0) {
+            for(int i = 0; i < REC_BUF_SIZE; i ++ ) count +=(uint8_t )rec_buf[i];
+            write(con_fd2,rec_buf,REC_BUF_SIZE);
+        }
+        cout<<tid<<" recved "<<count<<endl;
     }
 }
 

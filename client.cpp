@@ -33,17 +33,23 @@ std::atomic<int> stopMeasure(0);
 string server_ip = "127.0.0.1";
 
 
-void worker(int tid,int sfd){
+void worker(int tid,int send_sfd,int rec_sfd){
 
     char * send_buf;
     send_buf = (char * )malloc(send_buf_len);
     memset(send_buf,1,sizeof(send_buf));
 
+    char * rec_buf;
+    rec_buf = (char * )malloc(send_buf_len);
+    memset(rec_buf,1,sizeof(rec_buf));
+
+
     Tracer t;
     t.startTime();
     while (stopMeasure.load(std::memory_order_relaxed) == 0) {
         for(size_t i = 0; i < ROUND_SET; i++){
-            write(sfd,send_buf,send_buf_len);
+            write(send_sfd,send_buf,send_buf_len);
+            read(send_sfd,send_buf,send_buf_len + 10);
         }
         __sync_fetch_and_add(&g_sendcount, ROUND_SET);
 
@@ -95,12 +101,12 @@ int main(int argc, char **argv){
     runtimelist = new uint64_t [THREAD_NUM]();
 
     int *fds = new int[THREAD_NUM]();
-    for(int i = 0; i < THREAD_NUM; i++){
+    for(int i = 0; i < 2 * THREAD_NUM; i++){
         fds[i] = get_connect_fd(server_ip,PORT_BASE + i);
     }
 
     vector<thread> threads;
-    for(int i =0 ; i< THREAD_NUM;i++) threads.push_back(thread(worker,i,fds[i]));
+    for(int i =0 ; i< THREAD_NUM;i++) threads.push_back(thread(worker,i,fds[i],fds[i + THREAD_NUM]));
     for(int i =0 ; i< THREAD_NUM;i++) threads[i].join();
 
     uint64_t runtime = 0;
