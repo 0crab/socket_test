@@ -81,7 +81,7 @@ void worker(int tid) {
 
 
 
-        uint64_t count;
+        uint64_t count = 0 ;
         while (read(con_fd1, rec_buf, REC_BUF_SIZE) > 0) {
             for(int i = 0; i < REC_BUF_SIZE; i ++ ) count +=(uint8_t )rec_buf[i];
             write(con_fd2,rec_buf,REC_BUF_SIZE);

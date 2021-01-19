@@ -49,7 +49,8 @@ void worker(int tid,int send_sfd,int rec_sfd){
     while (stopMeasure.load(std::memory_order_relaxed) == 0) {
         for(size_t i = 0; i < ROUND_SET; i++){
             write(send_sfd,send_buf,send_buf_len);
-            read(send_sfd,send_buf,send_buf_len + 10);
+            int read_num = read(rec_sfd,send_buf,send_buf_len );
+                if(read_num == -1) exit(0);
         }
         __sync_fetch_and_add(&g_sendcount, ROUND_SET);
 
@@ -100,7 +101,7 @@ int main(int argc, char **argv){
 
     runtimelist = new uint64_t [THREAD_NUM]();
 
-    int *fds = new int[THREAD_NUM]();
+    int *fds = new int[2 * THREAD_NUM]();
     for(int i = 0; i < 2 * THREAD_NUM; i++){
         fds[i] = get_connect_fd(server_ip,PORT_BASE + i);
     }
